@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberTwin X</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@400;500;600&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<button class="menu-btn" id="menuBtn" aria-label="Menu">Menu</button>
+<nav class="sidebar" id="sidebar">
+  <div class="brand">CYBERTWIN <span>X</span></div>
+  <a href="#overview" data-v="overview" class="active">Overview</a>
+  <a href="#twin" data-v="twin">Digital Twin</a>
+  <a href="#procs" data-v="procs">System Processes</a>
+  <a href="#net" data-v="net">Network Monitor</a>
+  <a href="#dead" data-v="dead">Dead Internet Detector</a>
+  <a href="#history" data-v="history">Analysis History</a>
+  <a href="#settings" data-v="settings">Settings</a>
+  <div class="mon"><span id="dot" class="dot"></span><span id="monState">Stopped</span></div>
+</nav>
+<main>
+  <div id="banner" class="banner" hidden></div>
+  <div class="bar">
+    <button id="bStart">Start</button><button id="bStop">Stop</button><button id="bRefresh">Refresh</button>
+    <span class="tag">Data source: real, from this computer</span>
+  </div>
+
+  <section id="overview" class="view active">
+    <h2>Overview</h2>
+    <div class="cards">
+      <div class="card"><label>CPU</label><b id="mCpu">--</b></div>
+      <div class="card"><label>Memory</label><b id="mRam">--</b><small id="mRamD"></small></div>
+      <div class="card"><label>Disk</label><b id="mDisk">--</b><small id="mDiskD"></small></div>
+      <div class="card"><label>Uptime</label><b id="mUp">--</b><small id="mHost"></small></div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h3>CPU and memory, live</h3><div class="chartbox"><canvas id="chart1"></canvas></div><p id="chartMsg" class="empty" hidden>Charts need Chart.js from the internet. Numbers above still work.</p></div>
+      <div class="panel"><h3>Activity log</h3><pre id="term" class="term"></pre></div>
+    </div>
+    <div class="panel"><h3>System information</h3><div id="sysinfo" class="empty">Loading...</div></div>
+  </section>
+
+  <section id="twin" class="view">
+    <h2>Digital Twin</h2>
+    <p class="note">A 3D model of this computer, driven by your real readings.</p>
+    <div id="twin3d" class="twin3d"></div>
+    <p class="note">Drag to rotate. Chips glow with CPU, memory sticks light up with RAM use, the disk ring fills with disk use, and the fan speeds up under load.</p>
+  </section>
+
+  <section id="procs" class="view">
+    <h2>System Processes</h2>
+    <div class="bar"><button id="sortCpu">Sort by CPU</button><button id="sortMem">Sort by memory</button><span id="procTotal" class="tag"></span></div>
+    <div class="panel tablewrap"><table><thead><tr><th>PID</th><th>Name</th><th>CPU %</th><th>Memory %</th></tr></thead><tbody id="procBody"><tr><td colspan="4" class="empty">Press Start or Refresh to load processes.</td></tr></tbody></table></div>
+    <p class="note">Some system processes hide details unless the terminal runs as Administrator.</p>
+  </section>
+
+  <section id="net" class="view">
+    <h2>Network Monitor</h2>
+    <p class="note">Lists connections on this computer only. Windows usually requires an Administrator terminal for the process names and full list.</p>
+    <div class="panel tablewrap"><table><thead><tr><th>Proto</th><th>Local</th><th>Remote</th><th>Status</th><th>Process</th></tr></thead><tbody id="netBody"><tr><td colspan="5" class="empty">Press Refresh to load connections.</td></tr></tbody></table></div>
+  </section>
+
+  <section id="dead" class="view">
+    <h2>Dead Internet Detector</h2>
+    <p class="note">Paste one or more posts. Separate posts with a blank line. Results are repetition indicators, not proof of AI or bot authorship.</p>
+    <textarea id="txt" rows="9" maxlength="20000" placeholder="Post one...&#10;&#10;Post two..."></textarea>
+    <div class="bar"><button id="bAnalyze">Analyze</button><button id="bSample">Load sample posts</button><button id="bClear">Clear</button></div>
+    <div id="result" class="panel" hidden></div>
+  </section>
+
+  <section id="history" class="view">
+    <h2>Analysis History</h2>
+    <div class="bar"><button id="bClearHist">Delete history</button></div>
+    <div class="panel tablewrap"><table><thead><tr><th>Time</th><th>Preview</th><th>Posts</th><th>Repetition</th><th>Max similarity</th><th>Level</th></tr></thead><tbody id="histBody"></tbody></table></div>
+  </section>
+
+  <section id="settings" class="view">
+    <h2>Settings</h2>
+    <div class="panel form">
+      <label>Refresh interval (seconds) <input type="number" id="sInt" min="1" max="30"></label>
+      <label>CPU alert above (%) <input type="number" id="sCpu" min="10" max="100"></label>
+      <label>Memory alert above (%) <input type="number" id="sRam" min="10" max="100"></label>
+      <label>Disk alert above (%) <input type="number" id="sDisk" min="10" max="100"></label>
+      <button id="sSave">Save settings</button>
+    </div>
+    <div class="panel"><h3>Permissions</h3><p class="note">Metrics, uptime and the process list work without special rights. Network connections and some process details need an Administrator terminal on Windows. The server only listens on 127.0.0.1 and monitors this computer. Do not expose it to the internet. No passwords or personal data are collected.</p></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <h3>CYBERTWIN X</h3>
+  <p>Crafted with focus by <strong>Asnaf Deen</strong> ✦</p>
+  <small>LOCAL-FIRST SECURITY TOOL · V1.0</small>
+</footer>
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
